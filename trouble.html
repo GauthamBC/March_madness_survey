@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<title>March Madness Trouble at Work</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+
+<style>
+
+body{
+font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+background:white;
+margin:0;
+padding:20px;
+}
+
+/* WRAPPER */
+
+.wrapper{
+max-width:950px;
+margin:auto;
+}
+
+/* TABS */
+
+.tabs{
+display:flex;
+gap:8px;
+margin-bottom:14px;
+}
+
+.tab{
+padding:10px 18px;
+border:1px solid #ddd;
+background:#f5f5f5;
+cursor:pointer;
+font-weight:600;
+}
+
+.tab.active{
+background:#000;
+color:white;
+border-color:#000;
+}
+
+/* PANEL AREA */
+
+.canvas{
+position:relative;
+}
+
+.panel{
+display:none;
+}
+
+.panel.active{
+display:block;
+}
+
+/* MAP VIEW */
+
+h1{
+text-align:center;
+margin-bottom:6px;
+}
+
+.subtitle{
+text-align:center;
+color:#666;
+margin-bottom:20px;
+}
+
+#map{
+width:100%;
+max-width:950px;
+margin:auto;
+display:block;
+}
+
+.state{
+stroke:#ffffff;
+stroke-width:3;
+}
+
+.legend{
+width:400px;
+height:14px;
+margin:20px auto;
+background:linear-gradient(
+90deg,
+#fff6d6,
+#ffe08a,
+#ffc94a,
+#f5a623,
+#d88900,
+#8c5a00
+);
+}
+
+.tooltip{
+position:absolute;
+background:white;
+border:1px solid #ccc;
+padding:10px;
+pointer-events:none;
+font-size:14px;
+box-shadow:0 3px 12px rgba(0,0,0,0.2);
+}
+
+.tooltip b{
+font-size:15px;
+}
+
+/* WIDGET */
+
+.widget{
+width:100%;
+max-width:950px;
+margin:auto;
+display:flex;
+flex-direction:column;
+box-shadow:0 4px 20px rgba(0,0,0,0.1);
+}
+
+.question{
+background:#000;
+color:#fff;
+padding:20px 24px;
+font-size:20px;
+font-weight:700;
+}
+
+.content{
+display:grid;
+grid-template-columns:1fr 1fr;
+}
+
+.left{
+display:flex;
+align-items:center;
+justify-content:center;
+padding:40px;
+border-right:1px solid #eee;
+}
+
+.highlight{
+background:#fff3d4;
+border-left:6px solid #d88900;
+padding:40px;
+max-width:360px;
+color:#b36b00;
+}
+
+.highlight .big{
+font-size:34px;
+font-weight:800;
+margin-bottom:12px;
+}
+
+.highlight .statement{
+font-size:22px;
+font-weight:700;
+}
+
+.right{
+padding:40px;
+display:flex;
+flex-direction:column;
+}
+
+.table-title{
+font-weight:700;
+font-size:18px;
+margin-bottom:20px;
+}
+
+.rows{
+display:flex;
+flex-direction:column;
+justify-content:space-evenly;
+flex:1;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+border-bottom:1px dashed #ddd;
+padding:10px 0;
+font-size:16px;
+}
+
+.rank{
+color:#d88900;
+font-weight:700;
+margin-right:8px;
+}
+
+.footer{
+padding:12px 18px;
+border-top:1px solid #eee;
+font-size:13px;
+color:#777;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="tabs">
+<div class="tab active" data-view="map">Map View</div>
+<div class="tab" data-view="stats">National Stats</div>
+</div>
+
+<div class="canvas">
+
+<!-- MAP PANEL -->
+
+<div class="panel active" id="map-panel">
+
+<h1>March Madness Trouble at Work by State</h1>
+
+<div class="subtitle">
+Share of workers who say they've gotten in trouble during the tournament
+</div>
+
+<svg id="map" viewBox="0 0 975 610"></svg>
+
+<div class="legend"></div>
+
+<div class="tooltip" id="tooltip"></div>
+
+</div>
+
+<!-- STATS PANEL -->
+
+<div class="panel" id="stats-panel">
+
+<div class="widget">
+
+<div class="question">
+Q. To what extent have you ever gotten in trouble at work because of March Madness?
+</div>
+
+<div class="content">
+
+<div class="left">
+
+<div class="highlight">
+
+<div class="big">
+About 1 in 5 workers (21%)
+</div>
+
+<div class="statement">
+say they have gotten into trouble during March Madness
+</div>
+
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="table-title">
+Top States for Workplace Trouble
+</div>
+
+<div class="rows">
+
+<div class="row"><span><span class="rank">1</span> Washington</span><span>49%</span></div>
+<div class="row"><span><span class="rank">2</span> Georgia</span><span>42%</span></div>
+<div class="row"><span><span class="rank">3</span> New York</span><span>40%</span></div>
+<div class="row"><span><span class="rank">4</span> Texas</span><span>37%</span></div>
+<div class="row"><span><span class="rank">5</span> California</span><span>36%</span></div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+Source: VegasInsider.com
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* TAB SWITCH */
+
+document.querySelectorAll(".tab").forEach(tab=>{
+tab.onclick=()=>{
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+tab.classList.add("active");
+
+document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+
+if(tab.dataset.view==="map"){
+document.getElementById("map-panel").classList.add("active");
+}else{
+document.getElementById("stats-panel").classList.add("active");
+}
+};
+});
+
+/* STATE DATA */
+
+const data = {
+
+"Washington":{rank:1,overall:49,formal:28,informal:21},
+"Georgia":{rank:2,overall:42,formal:25,informal:17},
+"New York":{rank:3,overall:40,formal:22,informal:18},
+"Texas":{rank:4,overall:37,formal:19,informal:18},
+"California":{rank:5,overall:36,formal:20,informal:16},
+"Michigan":{rank:6,overall:30,formal:8,informal:22},
+"Idaho":{rank:7,overall:29,formal:18,informal:11},
+"Florida":{rank:8,overall:28,formal:14,informal:14},
+"Indiana":{rank:9,overall:27,formal:10,informal:17},
+"Illinois":{rank:10,overall:26,formal:14,informal:12},
+"Maryland":{rank:11,overall:26,formal:13,informal:13},
+"Massachusetts":{rank:12,overall:25,formal:17,informal:8},
+"Delaware":{rank:13,overall:25,formal:15,informal:10},
+"South Carolina":{rank:14,overall:25,formal:10,informal:15},
+"Arizona":{rank:15,overall:25,formal:9,informal:16},
+"Louisiana":{rank:16,overall:24,formal:13,informal:11},
+"Virginia":{rank:17,overall:24,formal:13,informal:11},
+"Tennessee":{rank:18,overall:23,formal:14,informal:9},
+"Pennsylvania":{rank:19,overall:22,formal:14,informal:8},
+"Mississippi":{rank:20,overall:22,formal:11,informal:11},
+"Ohio":{rank:21,overall:22,formal:7,informal:15},
+"Oregon":{rank:22,overall:22,formal:7,informal:15},
+"North Carolina":{rank:23,overall:21,formal:11,informal:10},
+"Alabama":{rank:24,overall:21,formal:10,informal:11},
+"Connecticut":{rank:25,overall:20,formal:11,informal:9},
+"Kansas":{rank:26,overall:20,formal:10,informal:10},
+"New Jersey":{rank:27,overall:20,formal:9,informal:11},
+"South Dakota":{rank:28,overall:20,formal:9,informal:11},
+"Kentucky":{rank:29,overall:18,formal:10,informal:8},
+"Vermont":{rank:30,overall:18,formal:7,informal:11},
+"Wisconsin":{rank:31,overall:18,formal:7,informal:11},
+"Arkansas":{rank:32,overall:17,formal:11,informal:6},
+"West Virginia":{rank:33,overall:17,formal:10,informal:7},
+"Missouri":{rank:34,overall:17,formal:9,informal:8},
+"New Mexico":{rank:35,overall:17,formal:5,informal:12},
+"Rhode Island":{rank:36,overall:13,formal:6,informal:7},
+"Montana":{rank:37,overall:13,formal:0,informal:13},
+"Maine":{rank:38,overall:12,formal:7,informal:5},
+"Nevada":{rank:39,overall:12,formal:7,informal:5},
+"New Hampshire":{rank:40,overall:12,formal:7,informal:5},
+"Nebraska":{rank:41,overall:12,formal:3,informal:9},
+"Utah":{rank:42,overall:11,formal:7,informal:4},
+"Alaska":{rank:43,overall:10,formal:6,informal:4},
+"Oklahoma":{rank:44,overall:10,formal:5,informal:5},
+"Colorado":{rank:45,overall:9,formal:2,informal:7},
+"Iowa":{rank:46,overall:8,formal:5,informal:3},
+"Hawaii":{rank:47,overall:7,formal:7,informal:0},
+"Minnesota":{rank:48,overall:6,formal:3,informal:3},
+"Wyoming":{rank:49,overall:4,formal:2,informal:2},
+"North Dakota":{rank:50,overall:2,formal:0,informal:2}
+
+};
+
+const color = d3.scaleQuantize()
+.domain([0,50])
+.range(["#fff6d6","#ffe08a","#ffc94a","#f5a623","#d88900","#8c5a00"]);
+
+const svg = d3.select("#map");
+
+const projection = d3.geoAlbersUsa()
+.scale(1300)
+.translate([487,305]);
+
+const path = d3.geoPath().projection(projection);
+
+const tooltip = d3.select("#tooltip");
+
+d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json")
+.then(us=>{
+
+const states = topojson.feature(us, us.objects.states).features;
+
+svg.selectAll("path")
+.data(states)
+.join("path")
+.attr("class","state")
+.attr("d",path)
+.attr("fill",d=>{
+const state = d.properties.name;
+return data[state] ? color(data[state].overall) : "#eee";
+})
+.on("mousemove",(event,d)=>{
+const s=data[d.properties.name];
+if(!s) return;
+
+tooltip
+.style("display","block")
+.style("left",event.pageX+12+"px")
+.style("top",event.pageY+12+"px")
+.html(`
+<b>${d.properties.name} — Rank #${s.rank}</b><br>
+Overall trouble: ${s.overall}%<br>
+• Formal warning/write-up: ${s.formal}%<br>
+• Informal trouble: ${s.informal}%
+`);
+})
+.on("mouseout",()=>tooltip.style("display","none"));
+
+});
+
+</script>
+
+</body>
+</html>
