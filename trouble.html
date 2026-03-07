@@ -87,6 +87,13 @@ display:block;
 stroke:#ffffff;
 stroke-width:3;
 cursor:pointer;
+transition:stroke-width 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+}
+
+.state.is-active{
+stroke:#ffffff;
+stroke-width:6;
+filter:brightness(0.92);
 }
 
 .legend-wrap{
@@ -660,9 +667,12 @@ svg.selectAll("path")
 const state = d.properties.name;
 return data[state] ? color(data[state].overall) : "#eee";
 })
-.on("mouseenter",(event,d)=>{
+.on("mouseenter",function(event,d){
 const s = data[d.properties.name];
 if(!s) return;
+
+svg.selectAll(".state").classed("is-active", false);
+d3.select(this).classed("is-active", true).raise();
 
 const [cx, cy] = path.centroid(d);
 const mapRect = document.getElementById("map").getBoundingClientRect();
@@ -694,7 +704,10 @@ tooltip
 .style("left", left + "px")
 .style("top", top + "px");
 })
-.on("mouseleave",()=>tooltip.style("display","none"));
+.on("mouseleave",function(){
+d3.select(this).classed("is-active", false);
+tooltip.style("display","none");
+});
 
 });
 
