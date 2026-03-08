@@ -64,6 +64,12 @@ display:block;
 
 /* MAP VIEW */
 
+#map-panel{
+background:#f7f7f7;
+border-radius:12px;
+padding:14px 14px 12px 14px;
+}
+
 h1{
 text-align:center;
 margin:0 0 4px 0;
@@ -76,7 +82,7 @@ letter-spacing:-0.02em;
 .subtitle{
 text-align:center;
 color:#666;
-margin-bottom:10px;
+margin-bottom:8px;
 font-size:16px;
 line-height:1.2;
 }
@@ -105,7 +111,7 @@ filter:brightness(0.92);
 
 .legend-wrap{
 width:340px;
-margin:10px auto 0 auto;
+margin:8px auto 0 auto;
 }
 
 .legend-labels{
@@ -135,7 +141,7 @@ background:linear-gradient(
 display:flex;
 justify-content:center;
 align-items:center;
-margin-top:10px;
+margin-top:8px;
 }
 
 .map-brand img{
@@ -368,6 +374,12 @@ padding:10px;
 margin-bottom:8px;
 }
 
+#map-panel{
+background:#f7f7f7;
+border-radius:10px;
+padding:12px 10px 10px 10px;
+}
+
 h1{
 font-size:clamp(18px, 4.5vw, 28px);
 white-space:normal;
@@ -393,7 +405,7 @@ height:12px;
 
 .map-brand{
 justify-content:center;
-margin-top:10px;
+margin-top:8px;
 }
 
 .map-brand img{
@@ -402,76 +414,84 @@ max-width:80%;
 }
 
 .question{
-font-size:17px;
-padding:16px 16px;
+font-size:15px;
+padding:12px 14px;
+line-height:1.24;
 }
 
 .left{
-padding:18px 16px 14px 16px;
+padding:14px 14px 10px 14px;
 }
 
 .right{
-padding:16px 16px 12px 16px;
+padding:12px 14px 10px 14px;
 }
 
 .highlight{
-padding:22px 20px;
+padding:16px 16px;
 max-width:100%;
+border-left:5px solid #d88900;
 }
 
 .highlight .big{
-font-size:30px;
-margin-bottom:10px;
+font-size:24px;
+margin-bottom:8px;
 white-space:normal;
+line-height:1.1;
 }
 
 .highlight .statement{
-font-size:19px;
+font-size:16px;
 white-space:normal;
+line-height:1.15;
 }
 
 .table-title{
-font-size:20px;
-margin-bottom:12px;
+font-size:18px;
+margin-bottom:10px;
 }
 
 .rows-scroll{
-max-height:320px;
+max-height:250px;
 }
 
 .row{
-padding:10px 0 12px 0;
+padding:8px 0 9px 0;
 }
 
 .row-head{
-font-size:15px;
-margin-bottom:7px;
+font-size:14px;
+margin-bottom:6px;
+gap:12px;
 }
 
 .rank{
-margin-right:10px;
-min-width:18px;
+margin-right:8px;
+min-width:16px;
 }
 
 .value{
-min-width:44px;
+min-width:40px;
+font-size:14px;
 }
 
 .bar-track{
-height:9px;
+height:8px;
 }
 
 .footer{
+padding:8px 12px;
 flex-direction:row;
 justify-content:space-between;
 align-items:center;
-gap:12px;
+gap:10px;
 flex-wrap:nowrap;
+font-size:12px;
 }
 
 .footer img{
-width:100px;
-max-width:38%;
+width:88px;
+max-width:36%;
 flex-shrink:0;
 }
 
