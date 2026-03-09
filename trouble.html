@@ -254,7 +254,7 @@ flex-shrink:0;
 
 .rows-scroll{
 flex:1;
-min-height:0;
+min-height:140px;
 overflow-y:auto;
 padding-right:8px;
 scrollbar-width:thin;
@@ -807,8 +807,11 @@ const statsPanelStyles = window.getComputedStyle(statsPanel);
 const panelVerticalPadding =
 parseFloat(statsPanelStyles.paddingTop) + parseFloat(statsPanelStyles.paddingBottom);
 
-statsPanel.style.height = mapHeight + "px";
-statsWidget.style.height = Math.max(0, mapHeight - panelVerticalPadding) + "px";
+/* desktop-only extra space so the stats table fills the iframe a bit more */
+const DESKTOP_STATS_EXTRA = 20;
+
+statsPanel.style.height = (mapHeight + DESKTOP_STATS_EXTRA) + "px";
+statsWidget.style.height = Math.max(0, mapHeight - panelVerticalPadding + DESKTOP_STATS_EXTRA) + "px";
 
 if(!mapPanel.classList.contains("active")){
 mapPanel.style.display = previousMapDisplay;
