@@ -850,9 +850,11 @@ const statsPanelStyles = window.getComputedStyle(statsPanel);
 const panelVerticalPadding =
 parseFloat(statsPanelStyles.paddingTop) + parseFloat(statsPanelStyles.paddingBottom);
 
-statsPanel.style.height = mapHeight + "px";
-statsWidget.style.height = Math.max(0, mapHeight - panelVerticalPadding) + "px";
+/* desktop-only boost so rows 6–7 become visible */
+const DESKTOP_TABLE_EXTRA = 90;
 
+statsPanel.style.height = (mapHeight + DESKTOP_TABLE_EXTRA) + "px";
+statsWidget.style.height = Math.max(0, mapHeight - panelVerticalPadding + DESKTOP_TABLE_EXTRA) + "px";
 setStatsRowsHeight();
 
 if(!mapPanel.classList.contains("active")){
