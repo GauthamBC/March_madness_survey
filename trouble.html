@@ -253,8 +253,6 @@ flex-shrink:0;
 }
 
 .rows-scroll{
-flex:1;
-min-height:140px;
 overflow-y:auto;
 padding-right:8px;
 scrollbar-width:thin;
@@ -477,8 +475,7 @@ margin-bottom:10px;
 }
 
 .rows-scroll{
-flex:none;
-min-height:auto;
+height:auto !important;
 max-height:250px;
 }
 
@@ -571,26 +568,26 @@ Share of workers who say they've gotten in trouble during the tournament
 
 <div class="widget" id="stats-widget">
 
-<div class="question">
+<div class="question" id="stats-question">
 Q. To what extent have you ever gotten in trouble at work because of March Madness?
 </div>
 
 <div class="content">
 
-<div class="left">
+<div class="left" id="stats-left">
 <div class="highlight">
 <div class="big">About 1 in 5 workers (21%)</div>
 <div class="statement">say they have gotten into trouble during March Madness</div>
 </div>
 </div>
 
-<div class="right">
+<div class="right" id="stats-right">
 
-<div class="table-title">
+<div class="table-title" id="stats-table-title">
 Top 10 States for Workplace Trouble
 </div>
 
-<div class="rows-scroll">
+<div class="rows-scroll" id="stats-rows-scroll">
 <div class="rows">
 
 <div class="row">
@@ -680,7 +677,7 @@ Top 10 States for Workplace Trouble
 
 </div>
 
-<div class="footer">
+<div class="footer" id="stats-footer">
 <span>Source: VegasInsider.com</span>
 <img src="https://i.postimg.cc/2Vw1zYN2/vegasinsider-logo.png" alt="VegasInsider logo">
 </div>
@@ -783,6 +780,51 @@ const path = d3.geoPath().projection(projection);
 
 const tooltip = d3.select("#tooltip");
 
+function setStatsRowsHeight(){
+const isMobile = window.innerWidth <= 768;
+const statsWidget = document.getElementById("stats-widget");
+const question = document.getElementById("stats-question");
+const left = document.getElementById("stats-left");
+const right = document.getElementById("stats-right");
+const tableTitle = document.getElementById("stats-table-title");
+const rowsScroll = document.getElementById("stats-rows-scroll");
+const footer = document.getElementById("stats-footer");
+
+if(isMobile){
+rowsScroll.style.height = "";
+rowsScroll.style.maxHeight = "250px";
+return;
+}
+
+rowsScroll.style.height = "";
+rowsScroll.style.maxHeight = "";
+
+const widgetStyles = window.getComputedStyle(statsWidget);
+const rightStyles = window.getComputedStyle(right);
+
+const widgetBorderTop = parseFloat(widgetStyles.borderTopWidth) || 0;
+const widgetBorderBottom = parseFloat(widgetStyles.borderBottomWidth) || 0;
+
+const rightPaddingTop = parseFloat(rightStyles.paddingTop) || 0;
+const rightPaddingBottom = parseFloat(rightStyles.paddingBottom) || 0;
+
+const totalWidgetHeight = statsWidget.clientHeight;
+
+const fixedHeight =
+question.offsetHeight +
+left.offsetHeight +
+tableTitle.offsetHeight +
+footer.offsetHeight +
+rightPaddingTop +
+rightPaddingBottom +
+widgetBorderTop +
+widgetBorderBottom;
+
+const availableRowsHeight = Math.max(140, totalWidgetHeight - fixedHeight);
+
+rowsScroll.style.height = availableRowsHeight + "px";
+}
+
 function syncDesktopPanelHeights(){
 const isMobile = window.innerWidth <= 768;
 
@@ -793,6 +835,7 @@ const statsWidget = document.getElementById("stats-widget");
 if(isMobile){
 statsPanel.style.height = "";
 statsWidget.style.height = "";
+setStatsRowsHeight();
 return;
 }
 
@@ -807,11 +850,10 @@ const statsPanelStyles = window.getComputedStyle(statsPanel);
 const panelVerticalPadding =
 parseFloat(statsPanelStyles.paddingTop) + parseFloat(statsPanelStyles.paddingBottom);
 
-/* desktop-only extra space so the stats table fills the iframe a bit more */
-const DESKTOP_STATS_EXTRA = 20;
+statsPanel.style.height = mapHeight + "px";
+statsWidget.style.height = Math.max(0, mapHeight - panelVerticalPadding) + "px";
 
-statsPanel.style.height = (mapHeight + DESKTOP_STATS_EXTRA) + "px";
-statsWidget.style.height = Math.max(0, mapHeight - panelVerticalPadding + DESKTOP_STATS_EXTRA) + "px";
+setStatsRowsHeight();
 
 if(!mapPanel.classList.contains("active")){
 mapPanel.style.display = previousMapDisplay;
@@ -883,7 +925,7 @@ tooltip.style("display","none");
 });
 
 requestAnimationFrame(syncDesktopPanelHeights);
-window.addEventListener("resize", syncDesktopPanelHeights);
+window.addEventListener("resize", ()=>{ syncDesktopPanelHeights(); });
 
 });
 
