@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<title>March Madness AI Bracket Use by State</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+background:white;
+margin:0;
+padding:12px;
+}
+
+.wrapper{
+max-width:950px;
+margin:auto;
+}
+
+/* TOP CONTROLS */
+
+.tabs{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:8px;
+margin-bottom:10px;
+}
+
+.tab,
+.embed-tab{
+width:100%;
+padding:10px 12px;
+border:1px solid #ddd;
+background:#f5f5f5;
+cursor:pointer;
+font-weight:700;
+font-size:14px;
+line-height:1.2;
+text-align:center;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+font-family:inherit;
+}
+
+.tab.active{
+background:#000;
+color:#fff;
+border-color:#000;
+}
+
+.embed-tab{
+background:#fff;
+color:#000;
+}
+
+.embed-tab:hover{
+background:#f0f0f0;
+}
+
+.embed-tab.copied{
+background:#000;
+color:#fff;
+border-color:#000;
+}
+
+.canvas{
+position:relative;
+}
+
+.panel{
+display:none;
+}
+
+.panel.active{
+display:block;
+}
+
+/* COPY TOAST */
+
+.copy-toast{
+position:fixed;
+right:20px;
+bottom:20px;
+background:#000;
+color:#fff;
+padding:12px 16px;
+font-size:14px;
+font-weight:600;
+line-height:1.2;
+box-shadow:0 8px 22px rgba(0,0,0,0.18);
+opacity:0;
+pointer-events:none;
+transform:translateY(10px);
+transition:opacity 0.22s ease, transform 0.22s ease;
+z-index:9999;
+}
+
+.copy-toast.show{
+opacity:1;
+transform:translateY(0);
+}
+
+/* MAP PANEL */
+
+#map-panel{
+background:#F7F7F7;
+padding:16px 16px 14px 16px;
+}
+
+h1{
+text-align:center;
+margin:0 0 4px 0;
+font-size:clamp(20px, 4vw, 34px);
+line-height:1.05;
+white-space:normal;
+letter-spacing:-0.02em;
+text-wrap:balance;
+}
+
+.subtitle{
+text-align:center;
+color:#666;
+margin-bottom:10px;
+font-size:16px;
+line-height:1.2;
+}
+
+#map{
+width:100%;
+max-width:950px;
+height:auto;
+max-height:500px;
+margin:auto;
+display:block;
+}
+
+.state{
+stroke:#ffffff;
+stroke-width:3;
+cursor:pointer;
+transition:stroke-width 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+}
+
+.state.is-active{
+stroke:#ffffff;
+stroke-width:6;
+filter:brightness(0.92);
+}
+
+.legend-wrap{
+width:min(340px, 100%);
+margin:10px auto 0 auto;
+}
+
+.legend-labels{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:12px;
+font-size:12px;
+font-weight:600;
+color:#666;
+margin-bottom:6px;
+}
+
+.legend-labels span{
+flex:1;
+min-width:0;
+line-height:1.25;
+}
+
+.legend-labels span:last-child{
+text-align:right;
+}
+
+.legend{
+width:100%;
+height:12px;
+background:linear-gradient(
+90deg,
+#fff6d6,
+#ffe08a,
+#ffc94a,
+#f5a623,
+#d88900,
+#8c5a00
+);
+}
+
+.map-brand{
+display:flex;
+justify-content:center;
+align-items:center;
+margin-top:10px;
+}
+
+.map-brand img{
+width:120px;
+height:auto;
+display:block;
+}
+
+.tooltip{
+position:absolute;
+background:white;
+border:1px solid #ccc;
+padding:10px;
+pointer-events:none;
+font-size:14px;
+box-shadow:0 3px 12px rgba(0,0,0,0.2);
+display:none;
+z-index:20;
+max-width:260px;
+line-height:1.35;
+}
+
+.tooltip b{
+font-size:15px;
+display:block;
+margin-bottom:4px;
+}
+
+/* STATS WIDGET */
+
+.widget{
+width:100%;
+max-width:950px;
+height:620px;
+margin:auto;
+display:flex;
+flex-direction:column;
+box-shadow:0 4px 20px rgba(0,0,0,0.1);
+background:#F7F7F7;
+position:relative;
+overflow:hidden;
+}
+
+.question{
+background:#000;
+color:#fff;
+padding:16px 20px;
+font-size:18px;
+font-weight:700;
+line-height:1.28;
+flex-shrink:0;
+}
+
+.content{
+display:flex;
+flex-direction:column;
+flex:1;
+min-height:0;
+}
+
+.left{
+padding:22px 24px 18px 24px;
+border-bottom:1px solid #eee;
+flex-shrink:0;
+}
+
+.highlight{
+background:#fff3d4;
+border-left:6px solid #d88900;
+padding:24px 28px;
+width:100%;
+max-width:100%;
+color:#b36b00;
+}
+
+.highlight .big{
+font-size:32px;
+font-weight:800;
+line-height:1.08;
+margin-bottom:0;
+white-space:normal;
+text-wrap:balance;
+}
+
+.right{
+padding:20px 24px 14px 24px;
+display:flex;
+flex-direction:column;
+flex:1;
+min-height:0;
+}
+
+.stats-toggle{
+display:flex;
+gap:8px;
+margin-bottom:14px;
+flex-shrink:0;
+}
+
+.stats-tab{
+appearance:none;
+border:1px solid #ddd;
+background:#fff;
+color:#000;
+padding:9px 14px;
+font-family:inherit;
+font-size:14px;
+font-weight:700;
+line-height:1.2;
+cursor:pointer;
+white-space:nowrap;
+}
+
+.stats-tab.active{
+background:#000;
+color:#fff;
+border-color:#000;
+}
+
+.table-title{
+font-weight:800;
+font-size:22px;
+margin-bottom:14px;
+flex-shrink:0;
+}
+
+.rows-scroll{
+flex:1;
+min-height:0;
+overflow-y:auto;
+padding-right:8px;
+scrollbar-width:thin;
+scrollbar-color:#d88900 #f3e7bf;
+}
+
+.rows-scroll::-webkit-scrollbar{
+width:6px;
+}
+
+.rows-scroll::-webkit-scrollbar-track{
+background:#f3e7bf;
+border-radius:999px;
+}
+
+.rows-scroll::-webkit-scrollbar-thumb{
+background:#d88900;
+border-radius:999px;
+}
+
+.rows-scroll::-webkit-scrollbar-thumb:hover{
+background:#bf7800;
+}
+
+.rows{
+display:flex;
+flex-direction:column;
+gap:0;
+}
+
+.row{
+border-bottom:1px dashed #ddd;
+padding:10px 0 12px 0;
+}
+
+.row:last-child{
+border-bottom:none;
+}
+
+.row-head{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:16px;
+margin-bottom:8px;
+font-size:17px;
+}
+
+.row .label{
+display:flex;
+align-items:center;
+min-width:0;
+font-weight:600;
+}
+
+.rank{
+color:#d88900;
+font-weight:800;
+margin-right:12px;
+min-width:20px;
+display:inline-block;
+}
+
+.state-name{
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.value{
+font-weight:700;
+white-space:nowrap;
+min-width:52px;
+text-align:right;
+}
+
+.bar-track{
+width:100%;
+height:10px;
+background:#f4e6ba;
+border-radius:999px;
+overflow:hidden;
+position:relative;
+}
+
+.bar-fill{
+height:100%;
+border-radius:999px;
+background:linear-gradient(90deg,#e9b735,#d88900);
+}
+
+.footer{
+padding:10px 18px;
+border-top:1px solid #eee;
+font-size:13px;
+color:#777;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:16px;
+position:sticky;
+bottom:0;
+background:#F7F7F7;
+z-index:5;
+flex-shrink:0;
+}
+
+.footer span{
+min-width:0;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.footer img{
+width:112px;
+height:auto;
+display:block;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px){
+
+body{
+padding:10px;
+}
+
+.tabs{
+gap:6px;
+margin-bottom:8px;
+}
+
+.tab,
+.embed-tab{
+padding:8px 8px;
+font-size:12px;
+}
+
+#map-panel{
+padding:12px 12px 10px 12px;
+}
+
+h1{
+font-size:clamp(16px, 4.2vw, 24px);
+line-height:1.08;
+letter-spacing:-0.025em;
+}
+
+.subtitle{
+font-size:13px;
+line-height:1.25;
+margin-bottom:8px;
+}
+
+#map{
+max-height:430px;
+}
+
+.legend-wrap{
+width:100%;
+max-width:280px;
+}
+
+.legend-labels{
+font-size:11px;
+gap:10px;
+margin-bottom:6px;
+}
+
+.legend-labels span{
+white-space:normal;
+}
+
+.legend{
+height:12px;
+}
+
+.map-brand{
+justify-content:center;
+margin-top:10px;
+}
+
+.map-brand img{
+width:120px;
+max-width:80%;
+}
+
+.widget{
+height:620px;
+}
+
+.question{
+font-size:17px;
+padding:16px 16px;
+}
+
+.left{
+padding:18px 16px 14px 16px;
+}
+
+.right{
+padding:16px 16px 12px 16px;
+}
+
+.highlight{
+padding:18px 16px;
+max-width:100%;
+}
+
+.highlight .big{
+font-size:24px;
+line-height:1.1;
+}
+
+.stats-toggle{
+gap:6px;
+margin-bottom:12px;
+}
+
+.stats-tab{
+padding:8px 10px;
+font-size:12px;
+}
+
+.table-title{
+font-size:20px;
+margin-bottom:12px;
+}
+
+.row{
+padding:10px 0 12px 0;
+}
+
+.row-head{
+font-size:15px;
+margin-bottom:7px;
+}
+
+.rank{
+margin-right:10px;
+min-width:18px;
+}
+
+.value{
+min-width:44px;
+}
+
+.bar-track{
+height:9px;
+}
+
+.footer{
+flex-direction:row;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+flex-wrap:nowrap;
+}
+
+.footer img{
+width:100px;
+max-width:38%;
+flex-shrink:0;
+}
+
+.copy-toast{
+right:12px;
+left:12px;
+bottom:12px;
+text-align:center;
+}
+
+}
+
+@media (max-width: 480px){
+
+h1{
+font-size:clamp(15px, 4vw, 20px);
+line-height:1.08;
+}
+
+.subtitle{
+font-size:12px;
+}
+
+.legend-wrap{
+max-width:240px;
+}
+
+.legend-labels{
+font-size:10px;
+gap:8px;
+}
+
+.highlight .big{
+font-size:20px;
+}
+
+.stats-tab{
+font-size:11px;
+padding:8px 8px;
+}
+
+.table-title{
+font-size:18px;
+}
+
+.row-head{
+font-size:14px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="tabs">
+  <button type="button" class="tab active" data-view="map" data-full="Map View" data-short="Map">Map View</button>
+  <button type="button" class="tab" data-view="stats" data-full="National Stats" data-short="Stats">National Stats</button>
+  <button type="button" class="embed-tab" id="embedToggle" data-full="Copy embed code" data-short="Embed">Copy embed code</button>
+</div>
+
+<div class="canvas">
+
+<!-- MAP PANEL -->
+<div class="panel active" id="map-panel">
+
+<h1>March Madness AI Bracket Use by State</h1>
+
+<div class="subtitle">
+Share of workers planning or considering AI for March Madness brackets this year
+</div>
+
+<svg id="map" viewBox="0 0 975 610"></svg>
+
+<div class="legend-wrap">
+<div class="legend-labels">
+<span>Lowest AI use</span>
+<span>Highest AI use</span>
+</div>
+<div class="legend"></div>
+</div>
+
+<div class="map-brand">
+<img src="https://i.postimg.cc/2Vw1zYN2/vegasinsider-logo.png" alt="VegasInsider logo">
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+</div>
+
+<!-- STATS PANEL -->
+<div class="panel" id="stats-panel">
+
+<div class="widget">
+
+<div class="question">
+Q. Which best describes your use of AI (e.g., ChatGPT) for March Madness brackets?
+</div>
+
+<div class="content">
+
+<div class="left">
+<div class="highlight">
+<div class="big">Nearly 2 in 5 have used AI for brackets before, while 52% plan to use it this year.</div>
+</div>
+</div>
+
+<div class="right">
+
+<div class="stats-toggle">
+<button type="button" class="stats-tab active" data-stats-view="past">Used AI Before</button>
+<button type="button" class="stats-tab" data-stats-view="plan">Planning AI This Year</button>
+</div>
+
+<div class="table-title" id="statsTitle">Top 10 States: Used AI Before</div>
+
+<div class="rows-scroll">
+<div class="rows" id="statsRows"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+<span>Source: VegasInsider.com</span>
+<img src="https://i.postimg.cc/2Vw1zYN2/vegasinsider-logo.png" alt="VegasInsider logo">
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="copy-toast" id="copyToast">Iframe code copied</div>
+
+<script>
+
+/* RESPONSIVE TOP LABELS */
+
+function updateTopButtonLabels(){
+  const isNarrow = window.innerWidth <= 768;
+
+  document.querySelectorAll(".tabs .tab, .tabs .embed-tab").forEach(el=>{
+    const full = el.getAttribute("data-full");
+    const short = el.getAttribute("data-short");
+    el.textContent = isNarrow ? short : full;
+  });
+}
+
+updateTopButtonLabels();
+window.addEventListener("resize", updateTopButtonLabels);
+
+/* TAB SWITCH */
+
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+
+    if(tab.dataset.view==="map"){
+      document.getElementById("map-panel").classList.add("active");
+    }else{
+      document.getElementById("stats-panel").classList.add("active");
+    }
+  };
+});
+
+/* EMBED COPY */
+
+const embedToggle = document.getElementById("embedToggle");
+const copyToast = document.getElementById("copyToast");
+
+const iframeCode = `<div style="max-width:950px; margin:0 auto; padding:0; line-height:0;">
+  <iframe
+    src="https://gauthambc.github.io/March_madness_survey/ai-brackets.html"
+    width="100%"
+    height="680"
+    style="border:0; display:block; width:100%; margin:0; padding:0;"
+    scrolling="no"
+    loading="lazy">
+  </iframe>
+</div>`;
+
+embedToggle.addEventListener("click", async ()=>{
+  try{
+    await navigator.clipboard.writeText(iframeCode);
+    showCopiedState();
+  }catch(err){
+    fallbackCopyTextToClipboard(iframeCode);
+    showCopiedState();
+  }
+});
+
+function showCopiedState(){
+  embedToggle.classList.add("copied");
+  copyToast.classList.add("show");
+  embedToggle.textContent = "Copied!";
+
+  setTimeout(()=>{
+    updateTopButtonLabels();
+    embedToggle.classList.remove("copied");
+    copyToast.classList.remove("show");
+  }, 1800);
+}
+
+function fallbackCopyTextToClipboard(text){
+  const temp = document.createElement("textarea");
+  temp.value = text;
+  temp.setAttribute("readonly","");
+  temp.style.position = "absolute";
+  temp.style.left = "-9999px";
+  document.body.appendChild(temp);
+  temp.select();
+  document.execCommand("copy");
+  document.body.removeChild(temp);
+}
+
+/* STATE DATA */
+
+const data = {
+"Florida":{past:57,plan:61,rankPast:1,rankPlan:6},
+"California":{past:56,plan:54,rankPast:2,rankPlan:21},
+"New York":{past:56,plan:64,rankPast:3,rankPlan:3},
+"Massachusetts":{past:54,plan:57,rankPast:4,rankPlan:12},
+"Delaware":{past:53,plan:52,rankPast:5,rankPlan:24},
+"Georgia":{past:53,plan:63,rankPast:6,rankPlan:4},
+"Virginia":{past:52,plan:67,rankPast:7,rankPlan:2},
+"Texas":{past:49,plan:59,rankPast:8,rankPlan:9},
+"Connecticut":{past:47,plan:47,rankPast:9,rankPlan:36},
+"Michigan":{past:46,plan:58,rankPast:10,rankPlan:11},
+"Washington":{past:46,plan:67,rankPast:11,rankPlan:1},
+"Tennessee":{past:44,plan:56,rankPast:12,rankPlan:18},
+"Idaho":{past:44,plan:57,rankPast:13,rankPlan:14},
+"New Jersey":{past:43,plan:55,rankPast:14,rankPlan:20},
+"Mississippi":{past:42,plan:56,rankPast:15,rankPlan:17},
+"Maryland":{past:42,plan:50,rankPast:16,rankPlan:30},
+"Illinois":{past:41,plan:59,rankPast:17,rankPlan:8},
+"South Carolina":{past:40,plan:47,rankPast:18,rankPlan:37},
+"Nevada":{past:39,plan:60,rankPast:19,rankPlan:7},
+"Pennsylvania":{past:37,plan:51,rankPast:20,rankPlan:28},
+"Kansas":{past:37,plan:57,rankPast:21,rankPlan:13},
+"South Dakota":{past:37,plan:52,rankPast:22,rankPlan:23},
+"Missouri":{past:36,plan:47,rankPast:23,rankPlan:35},
+"Louisiana":{past:36,plan:49,rankPast:24,rankPlan:32},
+"North Carolina":{past:35,plan:61,rankPast:25,rankPlan:5},
+"Montana":{past:35,plan:47,rankPast:26,rankPlan:39},
+"Indiana":{past:35,plan:58,rankPast:27,rankPlan:10},
+"Arkansas":{past:34,plan:48,rankPast:28,rankPlan:33},
+"Colorado":{past:34,plan:51,rankPast:29,rankPlan:27},
+"Kentucky":{past:34,plan:51,rankPast:30,rankPlan:26},
+"Arizona":{past:33,plan:53,rankPast:31,rankPlan:22},
+"Oregon":{past:33,plan:57,rankPast:32,rankPlan:15},
+"Utah":{past:32,plan:44,rankPast:33,rankPlan:43},
+"New Mexico":{past:32,plan:47,rankPast:34,rankPlan:41},
+"Oklahoma":{past:31,plan:47,rankPast:35,rankPlan:38},
+"Alabama":{past:30,plan:51,rankPast:36,rankPlan:25},
+"Alaska":{past:29,plan:33,rankPast:37,rankPlan:48},
+"Iowa":{past:29,plan:55,rankPast:38,rankPlan:19},
+"West Virginia":{past:29,plan:40,rankPast:39,rankPlan:46},
+"Vermont":{past:29,plan:43,rankPast:40,rankPlan:45},
+"Hawaii":{past:27,plan:56,rankPast:41,rankPlan:16},
+"Maine":{past:27,plan:50,rankPast:42,rankPlan:29},
+"Ohio":{past:27,plan:49,rankPast:43,rankPlan:31},
+"Rhode Island":{past:26,plan:48,rankPast:44,rankPlan:34},
+"Nebraska":{past:23,plan:43,rankPast:45,rankPlan:44},
+"Minnesota":{past:23,plan:47,rankPast:46,rankPlan:40},
+"Wisconsin":{past:21,plan:46,rankPast:47,rankPlan:42},
+"New Hampshire":{past:20,plan:33,rankPast:48,rankPlan:49},
+"Wyoming":{past:18,plan:36,rankPast:49,rankPlan:47},
+"North Dakota":{past:10,plan:30,rankPast:50,rankPlan:50}
+};
+
+const color = d3.scaleQuantize()
+.domain([30,67])
+.range(["#fff6d6","#ffe08a","#ffc94a","#f5a623","#d88900","#8c5a00"]);
+
+const svg = d3.select("#map");
+const projection = d3.geoAlbersUsa().scale(1300).translate([487,305]);
+const path = d3.geoPath().projection(projection);
+const tooltip = d3.select("#tooltip");
+
+/* STATS PANEL DATA */
+
+const topPast = [
+{name:"Florida", value:57, rank:1},
+{name:"California", value:56, rank:2},
+{name:"New York", value:56, rank:3},
+{name:"Massachusetts", value:54, rank:4},
+{name:"Delaware", value:53, rank:5},
+{name:"Georgia", value:53, rank:6},
+{name:"Virginia", value:52, rank:7},
+{name:"Texas", value:49, rank:8},
+{name:"Connecticut", value:47, rank:9},
+{name:"Michigan", value:46, rank:10}
+];
+
+const topPlan = [
+{name:"Washington", value:67, rank:1},
+{name:"Virginia", value:67, rank:2},
+{name:"New York", value:64, rank:3},
+{name:"Georgia", value:63, rank:4},
+{name:"North Carolina", value:61, rank:5},
+{name:"Florida", value:61, rank:6},
+{name:"Nevada", value:60, rank:7},
+{name:"Illinois", value:59, rank:8},
+{name:"Texas", value:59, rank:9},
+{name:"Indiana", value:58, rank:10}
+];
+
+const statsTitle = document.getElementById("statsTitle");
+const statsRows = document.getElementById("statsRows");
+const statsTabs = document.querySelectorAll(".stats-tab");
+
+function renderStatsRows(view){
+  const rows = view === "past" ? topPast : topPlan;
+  statsTitle.textContent = view === "past"
+    ? "Top 10 States: Used AI Before"
+    : "Top 10 States: Planning AI This Year";
+
+  statsRows.innerHTML = rows.map(item => `
+    <div class="row">
+      <div class="row-head">
+        <span class="label"><span class="rank">${item.rank}</span><span class="state-name">${item.name}</span></span>
+        <span class="value">${item.value}%</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${item.value}%"></div></div>
+    </div>
+  `).join("");
+}
+
+statsTabs.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    statsTabs.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    renderStatsRows(btn.dataset.statsView);
+  });
+});
+
+renderStatsRows("past");
+
+/* MAP */
+
+d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json")
+.then(us=>{
+
+const states = topojson.feature(us, us.objects.states).features;
+
+svg.selectAll("path")
+.data(states)
+.join("path")
+.attr("class","state")
+.attr("d",path)
+.attr("fill",d=>{
+const state = d.properties.name;
+return data[state] ? color(data[state].plan) : "#eee";
+})
+.on("mouseenter",function(event,d){
+const s = data[d.properties.name];
+if(!s) return;
+
+svg.selectAll(".state").classed("is-active", false);
+d3.select(this).classed("is-active", true).raise();
+
+const [cx, cy] = path.centroid(d);
+const mapRect = document.getElementById("map").getBoundingClientRect();
+const wrapperRect = document.querySelector(".canvas").getBoundingClientRect();
+
+tooltip
+.style("display","block")
+.html(`
+<b>${d.properties.name}</b>
+• Used AI before: ${s.past}% (Rank #${s.rankPast})<br>
+• Planning AI this year: ${s.plan}% (Rank #${s.rankPlan})
+`);
+
+const tooltipNode = tooltip.node();
+const tooltipWidth = tooltipNode.offsetWidth;
+const tooltipHeight = tooltipNode.offsetHeight;
+
+let left = (mapRect.left - wrapperRect.left) + cx - (tooltipWidth / 2);
+let top = (mapRect.top - wrapperRect.top) + cy - tooltipHeight - 12;
+
+const canvasWidth = wrapperRect.width;
+
+if(left < 8) left = 8;
+if(left + tooltipWidth > canvasWidth - 8) left = canvasWidth - tooltipWidth - 8;
+if(top < 8) top = (mapRect.top - wrapperRect.top) + cy + 12;
+
+tooltip
+.style("left", left + "px")
+.style("top", top + "px");
+})
+.on("mouseleave",function(){
+d3.select(this).classed("is-active", false);
+tooltip.style("display","none");
+});
+
+});
+
+</script>
+
+</body>
+</html>
